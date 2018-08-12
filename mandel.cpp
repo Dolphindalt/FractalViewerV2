@@ -1,9 +1,13 @@
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <limits.h>
-#include <assert.h>
+#include <cassert>
+#include <imgui.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_impl_opengl3.h>
+#include <string>
 
 #define MAJOR_VERSION 3
 #define MINOR_VERSION 1
@@ -11,11 +15,12 @@
 int width = 1000, height = 1000;
 int running = 1;
 double cx = 0.0, cy = 0.0, zoom = 1.0;
-
 #define ITR_STEP 10
 int itr = 100;
+int selection = 0;
+float orbit_x, orbit_y;
 
-char *file_to_string(char *file_name);
+char *file_to_string(const char *file_name);
 GLuint build_shader();
 void compile_shader(const char *str, GLuint id);
 void input();
@@ -78,6 +83,17 @@ int main(int argc, char *argv[])
 
     glBindVertexArray(vao);
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    ImGui_ImplSDL2_InitForOpenGL(window, glcon);
+    ImGui_ImplOpenGL3_Init("#version 400");
+
+    ImGui::StyleColorsLight();
+
+    bool testbool = 1;
+
     Uint64 now;
     Uint64 last_time = SDL_GetPerformanceCounter();
     double delta = 0;
@@ -92,17 +108,34 @@ int main(int argc, char *argv[])
             delta--;
         }
         
+        glUniform1i(glGetUniformLocation(shaders, "selection"), selection);
         glUniform2d(glGetUniformLocation(shaders, "screen_size"), (double)width, (double)height);
         glUniform1d(glGetUniformLocation(shaders, "screen_ratio"), (double)width/(double)height);
         glUniform2d(glGetUniformLocation(shaders, "center"), cx, cy);
         glUniform1d(glGetUniformLocation(shaders, "zoom"), zoom);
         glUniform1i(glGetUniformLocation(shaders, "iterations"), itr);
+        glUniform2d(glGetUniformLocation(shaders, "orbit_trap"), (double)orbit_x, (double)orbit_y);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1.0, 1.0, 1.0, 1.0);
         
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame(window);
+        ImGui::NewFrame();
+
+        ImGui::Begin("Mandelbrot Boy V2");
+        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 2);
+        ImGui::Text("Orbit Trapping");
+        ImGui::SliderFloat("Orbit X", &orbit_x, -10.0f, 10.0f);
+        ImGui::SliderFloat("Orbit Y", &orbit_y, -10.0f, 10.0f);
+        ImGui::End();
+
+        ImGui::Render();
+
+        SDL_GL_MakeCurrent(window, glcon);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
     }
 
@@ -120,6 +153,7 @@ void input()
     SDL_Event e;
     while(SDL_PollEvent(&e))
     {
+        ImGui_ImplSDL2_ProcessEvent(&e);
         switch(e.type)
         {
             case SDL_QUIT: running = 0; break;
@@ -185,7 +219,7 @@ GLuint build_shader()
     assert(vs_id);
     assert(fs_id);
 
-    char *vs_str = "#version 400\nin vec3 vp; void main () {  gl_Position = vec4 (vp, 1.0); }";
+    const char *vs_str = "#version 400\nin vec3 vp; void main () {  gl_Position = vec4 (vp, 1.0); }";
     char *fs_str = file_to_string("fragment.glsl");
 
     assert(fs_str);
@@ -222,7 +256,7 @@ GLuint build_shader()
     return shader_program_id;
 }
 
-char *file_to_string(char *file_name)
+char *file_to_string(const char *file_name)
 {
     char *buffer = 0;
     unsigned long len;

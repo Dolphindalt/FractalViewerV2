@@ -1,12 +1,12 @@
 #version 400
 
+uniform int selection;
 uniform double screen_ratio;
 uniform dvec2 screen_size;
 uniform dvec2 center;
+uniform dvec2 orbit_trap;
 uniform double zoom;
 uniform int iterations;
-
-dvec2 point = dvec2(2.0, 0.0);
 
 out vec4 colorOut;
 
@@ -31,9 +31,70 @@ const vec3 color_map[] =
     {0.41, 0.2,  0.01}
 };
 
+vec4 point_orbit_trap(dvec2 c)
+{
+    dvec2 z;
+    int i;
+    double dist = 1E20;
+    for(i = 0; i < iterations; i++)
+    {
+        double x = (z.x * z.x - z.y * z.y) + c.x;
+        double y = (z.y * z.x + z.x * z.y) + c.y;
+
+        if((x*x + y*y) > 4.0) break;
+        z.x = x;
+        z.y = y;
+
+        dist = min(dist, length(z - orbit_trap));
+    }
+    float d = float(dist);
+    if(iterations == i) return vec4(vec3(0.0), 1.0);
+    return vec4(dist, sin(d*20), cos(d)*10, 1.0);
+}
+
+vec4 pickover_stalks(dvec2 c)
+{
+    dvec2 z;
+    int i;
+    double dist = 1E20;
+    for(i = 0; i < iterations; i++)
+    {
+        double x = (z.x * z.x - z.y * z.y) + c.x;
+        double y = (z.y * z.x + z.x * z.y) + c.y;
+
+        if((x*x + y*y) > 4.0) break;
+        z.x = x;
+        z.y = y;
+
+        double dx = abs(z.x - orbit_trap.x);
+        double dy = abs(z.y - orbit_trap.y);
+        double smallest = min(dx, dy);
+        dist = min(dist, smallest);
+    }
+    float d = float(dist);
+    return vec4(dist, sin(d*20), sin(d)*10, 1.0);
+}
+
+vec4 iteration_map(dvec2 c)
+{
+    dvec2 z;
+    int i;
+    for(i = 0; i < iterations; i++)
+    {
+        double x = (z.x * z.x - z.y * z.y) + c.x;
+        double y = (z.y * z.x + z.x * z.y) + c.y;
+        if((x*x + y*y) > 2.0) break;
+        z.x = x;
+        z.y = y;
+    }
+    double t = double(i) / double(iterations);
+    uint row_i = (i * 100 / iterations % 17);
+    return vec4((i == iterations ? vec3(0.0) : color_map[row_i]), 1.0);
+}
+
 void main()
 {
-    dvec2 z, c;
+    dvec2 c;
     c.x = screen_ratio * (gl_FragCoord.x / screen_size.x - 0.5);
     c.y = screen_ratio * (gl_FragCoord.y / screen_size.y - 0.5);
 
@@ -43,29 +104,16 @@ void main()
     c.x += center.x;
     c.y += center.y;
 
-    int i;
-    double dist = 1E20;
-    for(i = 0; i < iterations; i++)
+    if(selection == 0)
     {
-        double x = (z.x * z.x - z.y * z.y) + c.x;
-        double y = (z.y * z.x + z.x * z.y) + c.y;
-        if((x*x + y*y) > 4.0) break;
-        z.x = x;
-        z.y = y;
-
-        double dx = abs(z.x - point.x);
-        double dy = abs(z.y - point.y);
-        double smallest = min(dx, dy);
-        dist = min(dist, smallest);
+        colorOut = pickover_stalks(c);
     }
-
-    //if(i == iterations)
-    //{
-        //colorOut = vec4(vec3(0.0), 1.0);
-    //}
-    //else
-    //{
-        float d = float(dist);
-        colorOut = vec4(dist, sin(d*20), sin(d)*10, 1.0);
-    //}
+    else if(selection == 1)
+    {
+        colorOut = iteration_map(c);
+    }
+    else if(selection == 2)
+    {
+        colorOut = point_orbit_trap(c);
+    }
 }
