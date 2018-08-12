@@ -9,13 +9,10 @@
 #define MINOR_VERSION 1
 
 int width = 1000, height = 1000;
-
 int running = 1;
-
 double cx = 0.0, cy = 0.0, zoom = 1.0;
 
 #define ITR_STEP 10
-
 int itr = 100;
 
 char *file_to_string(char *file_name);
