@@ -6,7 +6,7 @@ uniform dvec2 center;
 uniform double zoom;
 uniform int iterations;
 
-dvec2 point = dvec2(1.0, -1.0);
+dvec2 point = dvec2(2.0, 0.0);
 
 out vec4 colorOut;
 
@@ -35,7 +35,7 @@ void main()
 {
     dvec2 z, c;
     c.x = screen_ratio * (gl_FragCoord.x / screen_size.x - 0.5);
-    c.y = (gl_FragCoord.y / screen_size.y - 0.5);
+    c.y = screen_ratio * (gl_FragCoord.y / screen_size.y - 0.5);
 
     c.x /= zoom;
     c.y /= zoom;
@@ -49,20 +49,23 @@ void main()
     {
         double x = (z.x * z.x - z.y * z.y) + c.x;
         double y = (z.y * z.x + z.x * z.y) + c.y;
-        if((x*x + y*y) > 2.0) break;
+        if((x*x + y*y) > 4.0) break;
         z.x = x;
         z.y = y;
 
-        dist = min(dist, length(z - point));
+        double dx = abs(z.x - point.x);
+        double dy = abs(z.y - point.y);
+        double smallest = min(dx, dy);
+        dist = min(dist, smallest);
     }
 
-    if(i == iterations)
-    {
-        colorOut = vec4(vec3(0.0), 1.0);
-    }
-    else
-    {
+    //if(i == iterations)
+    //{
+        //colorOut = vec4(vec3(0.0), 1.0);
+    //}
+    //else
+    //{
         float d = float(dist);
-        colorOut = vec4(dist, sin(d*20), cos(d)*10, 1.0);
-    }
+        colorOut = vec4(dist, sin(d*20), sin(d)*10, 1.0);
+    //}
 }
