@@ -92,8 +92,6 @@ int main(int argc, char *argv[])
 
     ImGui::StyleColorsLight();
 
-    bool testbool = 1;
-
     Uint64 now;
     Uint64 last_time = SDL_GetPerformanceCounter();
     double delta = 0;
@@ -126,7 +124,8 @@ int main(int argc, char *argv[])
         ImGui::NewFrame();
 
         ImGui::Begin("Mandelbrot Boy V2");
-        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 2);
+        ImGui::Text("Itr: %d Zoom: %lf CX: %.5lf CY: %.5lfi", itr, zoom, cx, cy);
+        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 3);
         ImGui::Text("Orbit Trapping");
         ImGui::SliderFloat("Orbit X", &orbit_x, -10.0f, 10.0f);
         ImGui::SliderFloat("Orbit Y", &orbit_y, -10.0f, 10.0f);
@@ -141,7 +140,12 @@ int main(int argc, char *argv[])
 
     printf("Iterations: %d, Zoom: %lf at %.5lf + %.5lfi\n", itr, zoom, cx, cy);
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+    SDL_GL_DeleteContext(glcon);
     SDL_DestroyWindow(window);
+    SDL_Quit();
     glDeleteProgram(shaders);
     glDeleteVertexArrays(1, &vao);
     return 0;

@@ -41,7 +41,7 @@ vec4 point_orbit_trap(dvec2 c)
         double x = (z.x * z.x - z.y * z.y) + c.x;
         double y = (z.y * z.x + z.x * z.y) + c.y;
 
-        if((x*x + y*y) > 4.0) break;
+        if((x*x + y*y) > 2.0) break;
         z.x = x;
         z.y = y;
 
@@ -62,7 +62,7 @@ vec4 pickover_stalks(dvec2 c)
         double x = (z.x * z.x - z.y * z.y) + c.x;
         double y = (z.y * z.x + z.x * z.y) + c.y;
 
-        if((x*x + y*y) > 4.0) break;
+        if((x*x + y*y) > 2.0) break;
         z.x = x;
         z.y = y;
 
@@ -92,6 +92,28 @@ vec4 iteration_map(dvec2 c)
     return vec4((i == iterations ? vec3(0.0) : color_map[row_i]), 1.0);
 }
 
+vec4 normalized_colors(dvec2 c)
+{
+    dvec2 z;
+    int i;
+    for(i = 0; i < iterations; i++)
+    {
+        double x = (z.x * z.x - z.y * z.y) + c.x;
+        double y = (z.y * z.x + z.x * z.y) + c.y;
+        if((x*x + y*y) > 2.0) break;
+        z.x = x;
+        z.y = y;
+    }
+    
+    if(iterations == i)
+    {
+        return vec4(vec3(0.0), 1.0);
+    }
+
+    float mu = (i + 1 - log(log(float(abs(z))) / float(log(2)))) / float(iterations);
+    return vec4(mu+1.0, mu+0.5, mu, 1.0);
+}
+
 void main()
 {
     dvec2 c;
@@ -115,5 +137,9 @@ void main()
     else if(selection == 2)
     {
         colorOut = point_orbit_trap(c);
+    }
+    else if(selection == 3)
+    {
+        colorOut = normalized_colors(c);
     }
 }
