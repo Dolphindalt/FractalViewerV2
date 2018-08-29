@@ -7,6 +7,7 @@ uniform dvec2 center;
 uniform dvec2 orbit_trap;
 uniform double zoom;
 uniform int iterations;
+uniform vec3 color_mod;
 
 out vec4 colorOut;
 
@@ -96,22 +97,25 @@ vec4 normalized_colors(dvec2 c)
 {
     dvec2 z;
     int i;
+    double x, y;
     for(i = 0; i < iterations; i++)
     {
-        double x = (z.x * z.x - z.y * z.y) + c.x;
-        double y = (z.y * z.x + z.x * z.y) + c.y;
         if((x*x + y*y) > 4.0) break;
+        x = (z.x * z.x - z.y * z.y) + c.x;
+        y = (z.y * z.x + z.x * z.y) + c.y;
         z.x = x;
         z.y = y;
     }
     
-    if(iterations == i)
+    if(i == iterations)
     {
-        return vec4(vec3(0.0), 1.0);
+        return vec4(0.0);
     }
 
-    float mu = (i + 1 - log(log(float(abs(z))) / float(log(2)))) / float(iterations);
-    return vec4(mu+1.0, mu+0.5, mu, 1.0);
+    float nsmooth = i + 1 - log(log(float(z.x*z.x + z.y*z.y)))/log(2);
+    float r = (1.0) / (100);
+    float ry = (nsmooth - 1.0) * r;
+    return vec4(ry * color_mod.x, ry * color_mod.y, ry * color_mod.z, 1.0);
 }
 
 void main()

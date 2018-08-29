@@ -19,6 +19,7 @@ double cx = 0.0, cy = 0.0, zoom = 1.0;
 int itr = 100;
 int selection = 0;
 float orbit_x, orbit_y;
+float mod_x = 1.0, mod_y = 1.0, mod_z = 1.0;
 
 char *file_to_string(const char *file_name);
 GLuint build_shader();
@@ -113,6 +114,7 @@ int main(int argc, char *argv[])
         glUniform1d(glGetUniformLocation(shaders, "zoom"), zoom);
         glUniform1i(glGetUniformLocation(shaders, "iterations"), itr);
         glUniform2d(glGetUniformLocation(shaders, "orbit_trap"), (double)orbit_x, (double)orbit_y);
+        glUniform3f(glGetUniformLocation(shaders, "color_mod"), mod_x, mod_y, mod_z);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -129,6 +131,10 @@ int main(int argc, char *argv[])
         ImGui::Text("Orbit Trapping");
         ImGui::SliderFloat("Orbit X", &orbit_x, -10.0f, 10.0f);
         ImGui::SliderFloat("Orbit Y", &orbit_y, -10.0f, 10.0f);
+        ImGui::Text("Color Modding");
+        ImGui::SliderFloat("Mod X", &mod_x, 0.1, 3.0);
+        ImGui::SliderFloat("Mod Y", &mod_y, 0.1, 3.0);
+        ImGui::SliderFloat("Mod Z", &mod_z, 0.1, 3.0);
         ImGui::End();
 
         ImGui::Render();
