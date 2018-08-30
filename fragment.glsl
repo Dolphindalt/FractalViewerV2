@@ -9,6 +9,13 @@ uniform double zoom;
 uniform int iterations;
 uniform vec3 color_mod;
 
+uniform float kda;
+uniform float kdb;
+uniform float kdc;
+uniform float kdd;
+uniform float startx;
+uniform float starty;
+
 out vec4 colorOut;
 
 const vec3 color_map[] = 
@@ -31,6 +38,12 @@ const vec3 color_map[] =
     {0.6,  0.30, 0.0},
     {0.41, 0.2,  0.01}
 };
+
+float map(float value, float min1, float max1, float min2, float max2)
+{
+    float perc = (value - min1) / (max1 - min1);
+    return perc * (max2 - min2) + min2;
+}
 
 vec4 point_orbit_trap(dvec2 c)
 {
@@ -118,6 +131,20 @@ vec4 normalized_colors(dvec2 c)
     return vec4(ry * color_mod.x, ry * color_mod.y, ry * color_mod.z, 1.0);
 }
 
+vec4 kings_dream(dvec2 c)
+{
+    vec2 cc = vec2(c);
+    float x, y, xp = startx, yp = starty;
+    for(int i = 0; i < iterations; i++)
+    {
+        x = sin(yp * kdb) + kdc * sin(xp * kdb) + cc.x;
+        y = sin(xp * kda) + kdd * sin(yp * kda) + cc.y;
+        xp = x;
+        yp = y;
+    }
+    return vec4(map(x, 0.0, 1.0, 0, 800), map(y, 0.0, 1.0, 0, 800), 0.0, 1.0);
+}
+
 void main()
 {
     dvec2 c;
@@ -145,5 +172,9 @@ void main()
     else if(selection == 3)
     {
         colorOut = normalized_colors(c);
+    }
+    else if(selection == 4)
+    {
+        colorOut = kings_dream(c);
     }
 }

@@ -20,6 +20,8 @@ int itr = 100;
 int selection = 0;
 float orbit_x, orbit_y;
 float mod_x = 1.0, mod_y = 1.0, mod_z = 1.0;
+float kda = 1.0, kdb = 1.5, kdc = 1.5, kdd = -1.0;
+float startx = 0.0, starty = 0.0;
 
 char *file_to_string(const char *file_name);
 GLuint build_shader();
@@ -116,6 +118,13 @@ int main(int argc, char *argv[])
         glUniform2d(glGetUniformLocation(shaders, "orbit_trap"), (double)orbit_x, (double)orbit_y);
         glUniform3f(glGetUniformLocation(shaders, "color_mod"), mod_x, mod_y, mod_z);
 
+        glUniform1f(glGetUniformLocation(shaders, "kda"), kda);
+        glUniform1f(glGetUniformLocation(shaders, "kdb"), kdb);
+        glUniform1f(glGetUniformLocation(shaders, "kdc"), kdc);
+        glUniform1f(glGetUniformLocation(shaders, "kdd"), kdd);
+        glUniform1f(glGetUniformLocation(shaders, "startx"), startx);
+        glUniform1f(glGetUniformLocation(shaders, "starty"), starty);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1.0, 1.0, 1.0, 1.0);
         
@@ -127,14 +136,30 @@ int main(int argc, char *argv[])
 
         ImGui::Begin("Mandelbrot Boy V2");
         ImGui::Text("Itr: %d Zoom: %lf CX: %.5lf CY: %.5lfi", itr, zoom, cx, cy);
-        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 3);
-        ImGui::Text("Orbit Trapping");
-        ImGui::SliderFloat("Orbit X", &orbit_x, -10.0f, 10.0f);
-        ImGui::SliderFloat("Orbit Y", &orbit_y, -10.0f, 10.0f);
-        ImGui::Text("Color Modding");
-        ImGui::SliderFloat("Mod X", &mod_x, 0.1, 3.0);
-        ImGui::SliderFloat("Mod Y", &mod_y, 0.1, 3.0);
-        ImGui::SliderFloat("Mod Z", &mod_z, 0.1, 3.0);
+        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 4);
+        if(selection == 0 || selection == 2)
+        {
+            ImGui::Text("Orbit Trapping");
+            ImGui::SliderFloat("Orbit X", &orbit_x, -10.0f, 10.0f);
+            ImGui::SliderFloat("Orbit Y", &orbit_y, -10.0f, 10.0f);
+        }
+        if(selection == 3)
+        {
+            ImGui::Text("Color Modding");
+            ImGui::SliderFloat("Mod X", &mod_x, 0.1, 3.0);
+            ImGui::SliderFloat("Mod Y", &mod_y, 0.1, 3.0);
+            ImGui::SliderFloat("Mod Z", &mod_z, 0.1, 3.0);
+        }
+        if(selection == 4)
+        {
+            ImGui::Text("Kings Dream");
+            ImGui::SliderFloat("startx", &startx, -2.0, 2.0);
+            ImGui::SliderFloat("starty", &starty, -2.0, 2.0);
+            ImGui::SliderFloat("a", &kda, -3.0, 3.0);
+            ImGui::SliderFloat("b", &kdb, -3.0, 3.0);
+            ImGui::SliderFloat("c", &kdc, -0.5, 1.5);
+            ImGui::SliderFloat("d", &kdd, -0.5, 1.5);
+        }
         ImGui::End();
 
         ImGui::Render();
