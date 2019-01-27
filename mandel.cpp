@@ -22,6 +22,7 @@ float orbit_x, orbit_y;
 float mod_x = 1.0, mod_y = 1.0, mod_z = 1.0;
 float kda = 1.0, kdb = 1.5, kdc = 1.5, kdd = -1.0;
 float startx = 0.0, starty = 0.0;
+float uf_min_param = 16.0;
 
 char *file_to_string(const char *file_name);
 GLuint build_shader();
@@ -125,6 +126,8 @@ int main(int argc, char *argv[])
         glUniform1f(glGetUniformLocation(shaders, "startx"), startx);
         glUniform1f(glGetUniformLocation(shaders, "starty"), starty);
 
+        glUniform1f(glGetUniformLocation(shaders, "uf_min"), uf_min_param);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1.0, 1.0, 1.0, 1.0);
         
@@ -136,7 +139,7 @@ int main(int argc, char *argv[])
 
         ImGui::Begin("Mandelbrot Boy V2");
         ImGui::Text("Itr: %d Zoom: %lf CX: %.5lf CY: %.5lfi", itr, zoom, cx, cy);
-        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 4);
+        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 5);
         if(selection == 0 || selection == 2)
         {
             ImGui::Text("Orbit Trapping");
@@ -159,6 +162,11 @@ int main(int argc, char *argv[])
             ImGui::SliderFloat("b", &kdb, -3.0, 3.0);
             ImGui::SliderFloat("c", &kdc, -0.5, 1.5);
             ImGui::SliderFloat("d", &kdd, -0.5, 1.5);
+        }
+        if(selection == 5)
+        {
+            ImGui::Text("Unknown Fractal?");
+            ImGui::SliderFloat("Min Param", &uf_min_param, 1.0, 100.0);
         }
         ImGui::End();
 

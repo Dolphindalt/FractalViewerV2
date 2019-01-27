@@ -1,5 +1,7 @@
 #version 400
 
+#define M_PI 3.1415926535
+
 uniform int selection;
 uniform double screen_ratio;
 uniform dvec2 screen_size;
@@ -15,6 +17,8 @@ uniform float kdc;
 uniform float kdd;
 uniform float startx;
 uniform float starty;
+
+uniform float uf_min;
 
 out vec4 colorOut;
 
@@ -145,6 +149,35 @@ vec4 kings_dream(dvec2 c)
     return vec4(map(x, 0.0, 1.0, 0, 800), map(y, 0.0, 1.0, 0, 800), 0.0, 1.0);
 }
 
+vec2 cmul(vec2 a, vec2 b)
+{
+    return vec2(a.x*b.x-a.y*b.y, a.x*b.y+a.y*b.x);
+}
+
+vec2 ccos(vec2 a)
+{
+    return vec2(cos(a.x)*cosh(a.y), -sin(a.x)*sinh(a.y));
+}
+
+vec4 unknown_fractal(dvec2 c)
+{
+    vec2 z = vec2(c);
+    double d;
+    int i = 0, n = 0;
+    for(i = 0; i < iterations; i++)
+    {
+        d = length(z);
+        if(d > uf_min)
+        {
+            n = i;
+            break;
+        }
+        z = (vec2(1.0,0.0) + 4.0 * z - cmul(vec2(1.0,0.0) + 2.0 * z, ccos(M_PI * z))) / 4.0;
+    }
+    float t = log(float(n + 1)) / log(float(iterations));
+    return vec4(float(n != 0) * vec3(sqrt(t), t, 1.0 - sqrt(t)),1.0);
+}
+
 void main()
 {
     dvec2 c;
@@ -176,5 +209,9 @@ void main()
     else if(selection == 4)
     {
         colorOut = kings_dream(c);
+    }
+    else if(selection == 5)
+    {
+        colorOut = unknown_fractal(c);
     }
 }
