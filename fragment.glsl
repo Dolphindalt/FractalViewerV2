@@ -20,6 +20,8 @@ uniform float starty;
 
 uniform float uf_min;
 
+uniform sampler2D sampler;
+
 out vec4 colorOut;
 
 const vec3 color_map[] = 
@@ -178,6 +180,31 @@ vec4 unknown_fractal(dvec2 c)
     return vec4(float(n != 0) * vec3(sqrt(t), t, 1.0 - sqrt(t)),1.0);
 }
 
+vec4 getImageColor(vec2 p)
+{
+    return texture(sampler, p).rgba;
+}
+
+vec4 image_fractal(dvec2 c)
+{
+    dvec2 z;
+    vec4 col;
+    int i;
+    for(i = 0; i < iterations; i++)
+    {
+        double x = (z.x * z.x - z.y * z.y) + c.x;
+        double y = (z.y * z.x + z.x * z.y) + c.y;
+        if((x*x + y*y) > 4.0) break;
+        z.x = x;
+        z.y = y;
+        col = getImageColor(vec2(z));
+    }
+    if(iterations == i)
+        return vec4(0.0, 0.0, 0.0, 1.0);
+    else
+        return col;
+}
+
 void main()
 {
     dvec2 c;
@@ -213,5 +240,9 @@ void main()
     else if(selection == 5)
     {
         colorOut = unknown_fractal(c);
+    }
+    else if(selection == 6)
+    {
+        colorOut = image_fractal(c);
     }
 }

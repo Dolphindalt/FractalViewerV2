@@ -1,7 +1,7 @@
 CC=g++
 LIBS=-lGL -lGLEW -lSDL2 -lm
 NAME=mandel
-SOURCES=mandel.cpp imgui.cpp imgui_draw.cpp imgui_impl_sdl.cpp imgui_impl_opengl3.cpp
+SOURCES=mandel.cpp resources.cpp lodepng.cpp imgui.cpp imgui_draw.cpp imgui_impl_sdl.cpp imgui_impl_opengl3.cpp
 FLAGS=-I./imgui -I./imgui/examples
 OBJS= $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 

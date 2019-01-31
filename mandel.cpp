@@ -8,6 +8,7 @@
 #include <imgui_impl_sdl.h>
 #include <imgui_impl_opengl3.h>
 #include <string>
+#include "resources.h"
 
 #define MAJOR_VERSION 3
 #define MINOR_VERSION 1
@@ -23,6 +24,7 @@ float mod_x = 1.0, mod_y = 1.0, mod_z = 1.0;
 float kda = 1.0, kdb = 1.5, kdc = 1.5, kdd = -1.0;
 float startx = 0.0, starty = 0.0;
 float uf_min_param = 16.0;
+GLuint texture_id = 0;
 
 char *file_to_string(const char *file_name);
 GLuint build_shader();
@@ -96,6 +98,9 @@ int main(int argc, char *argv[])
 
     ImGui::StyleColorsLight();
 
+    std::string path = "beerus.png";
+    texture_id = load_png(path);
+
     Uint64 now;
     Uint64 last_time = SDL_GetPerformanceCounter();
     double delta = 0;
@@ -128,6 +133,11 @@ int main(int argc, char *argv[])
 
         glUniform1f(glGetUniformLocation(shaders, "uf_min"), uf_min_param);
 
+        glUniform1f(glGetUniformLocation(shaders, "sampler"), 0);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture_id);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1.0, 1.0, 1.0, 1.0);
         
@@ -139,21 +149,21 @@ int main(int argc, char *argv[])
 
         ImGui::Begin("Mandelbrot Boy V2");
         ImGui::Text("Itr: %d Zoom: %lf CX: %.5lf CY: %.5lfi", itr, zoom, cx, cy);
-        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 5);
+        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 6);
         if(selection == 0 || selection == 2)
         {
             ImGui::Text("Orbit Trapping");
             ImGui::SliderFloat("Orbit X", &orbit_x, -10.0f, 10.0f);
             ImGui::SliderFloat("Orbit Y", &orbit_y, -10.0f, 10.0f);
         }
-        if(selection == 3)
+        else if(selection == 3)
         {
             ImGui::Text("Color Modding");
             ImGui::SliderFloat("Mod X", &mod_x, 0.1, 3.0);
             ImGui::SliderFloat("Mod Y", &mod_y, 0.1, 3.0);
             ImGui::SliderFloat("Mod Z", &mod_z, 0.1, 3.0);
         }
-        if(selection == 4)
+        else if(selection == 4)
         {
             ImGui::Text("Kings Dream");
             ImGui::SliderFloat("startx", &startx, -2.0, 2.0);
@@ -163,10 +173,14 @@ int main(int argc, char *argv[])
             ImGui::SliderFloat("c", &kdc, -0.5, 1.5);
             ImGui::SliderFloat("d", &kdd, -0.5, 1.5);
         }
-        if(selection == 5)
+        else if(selection == 5)
         {
-            ImGui::Text("Unknown Fractal?");
+            ImGui::Text("Colatz Fractal");
             ImGui::SliderFloat("Min Param", &uf_min_param, 1.0, 100.0);
+        }
+        else if(selection == 6)
+        {
+            ImGui::Text("Derp");
         }
         ImGui::End();
 
