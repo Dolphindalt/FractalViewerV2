@@ -205,6 +205,22 @@ vec4 image_fractal(dvec2 c)
         return col;
 }
 
+vec4 burning_ship(dvec2 c)
+{
+    dvec2 z = dvec2(c);
+    int i;
+    while(z.x*z.x + z.y*z.y < 4.0 && i < iterations)
+    {
+        double xtemp = z.x*z.x - z.y*z.y + c.x;
+        z.y = abs(2*z.x*z.y) + c.y;
+        z.x = abs(xtemp);
+        i++;
+    }
+    if(i == iterations)
+        return vec4(0.0, 0.0, 0.0, 1.0);
+    return vec4(mod(i * 0.4, 1.0), mod(i * 0.2, 1.0), mod(i * 0.8, 1.0), 1.0);
+}
+
 void main()
 {
     dvec2 c;
@@ -244,5 +260,9 @@ void main()
     else if(selection == 6)
     {
         colorOut = image_fractal(c);
+    }
+    else if(selection == 7)
+    {
+        colorOut = burning_ship(c);
     }
 }

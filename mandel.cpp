@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 
         ImGui::Begin("Mandelbrot Boy V2");
         ImGui::Text("Itr: %d Zoom: %lf CX: %.5lf CY: %.5lfi", itr, zoom, cx, cy);
-        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 6);
+        ImGui::DragInt("Fractal Type", &selection, 1.0F, 0, 7);
         if(selection == 0 || selection == 2)
         {
             ImGui::Text("Orbit Trapping");
@@ -181,6 +181,10 @@ int main(int argc, char *argv[])
         else if(selection == 6)
         {
             ImGui::Text("Derp");
+        }
+        else if(selection == 7)
+        {
+            ImGui::Text("Burning Ship");
         }
         ImGui::End();
 
